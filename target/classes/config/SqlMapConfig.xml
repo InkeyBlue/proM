@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+	
+<configuration>
+	<properties resource="config/jdbc.properties"/>
+	
+	
+	<settings>
+	<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	
+	<typeAliases>
+		<package name="com.my.chat.domain"/><!-- memberVO, RoomVO -->
+	</typeAliases>
+	
+ 	 <environments default="test" >
+		<environment id="test">
+			<transactionManager type="JDBC"/>
+				<dataSource type="UNPOOLED">
+					<property name="driver" value="${JDBC.Driver}"/>
+					<property name="url" value="${JDBC.ConnectionURL}"/>
+					<property name="username" value="${JDBC.Username}"/>
+					<property name="password" value="${JDBC.Password}"/>
+				</dataSource>
+			</environment>
+	</environments>  
+	
+	<mappers>
+	<!-- 	<mapper resource="sql/board.xml"/> -->
+		<mapper resource="sql/member.xml"/>
+		<mapper resource="sql/room.xml"/>
+	</mappers>
+	
+</configuration>
+
+
+
+
+
+
+
+

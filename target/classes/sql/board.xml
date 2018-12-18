@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="boardMapper">
+<!-- 시퀀스가 들어있는 컬럼을 디비에 insert할 경우 -->
+	<sql id="insert-column">
+		no,title,content,count,w_date,id
+	</sql>
+	
+	<resultMap type="boardVO" id="boardSelectMap">
+      <result property="no" column="no" />
+      <result property="title" column="title" />
+      <result property="count" column="count" />
+      <result property="writeDate" column="w_date" />
+      <!-- 원래는 여기도 끊어서 따로 해줘야한다. -->
+      <result property="content" column="content" />
+      <result property="memberVO.id" column="id" />
+      
+      <!-- fileupload 부분 추가 -->
+      <result property="orgfilename" column="orgfilename"/>
+      <result property="newfilename" column="newfilename"/>
+   </resultMap>
+
+	
+	
+	<insert id="write" parameterType="boardVO">
+	<!--여기서 no만 selectkey로 해주는 이유는 pk이기 때문이다. -->
+		<selectKey keyProperty="no" resultType="int" order="BEFORE">
+		select springboard_upload_seq.nextVal FROM DUAL
+		</selectKey>
+		insert into springboard_upload (<include refid="insert-column"/>,orgfilename, newfilename)
+		values(#{no},#{title},#{content},#{count},sysdate,#{memberVO.id},#{orgfilename},#{newfilename})
+	</insert>
+	
+	<!-- 전체 게시글 목록보는 쿼리문: 이 때 최신글 5개만 보여지도록 쿼리문 작성 -->
+	<select id="getAllBoard"  resultMap="boardSelectMap">
+	<!--select s.no,s.title,s.content,s.count,s.w_date,m.name FROM springboard s,member m WHERE ROWNUM <![CDATA[<]]> 6 ORDER BY no desc;	-->
+	<!-- select s.no,s.title,s.content,s.count,s.w_date,m.name FROM (SELECT * FROM springboard ORDER BY no desc),springboard s,member m WHERE ROWNUM <![CDATA[<]]> 6; -->
+		 select no,title,count,w_date,id FROM springboard_upload WHERE <![CDATA[rownum<6]]> ORDER BY no desc
+	</select>
+	
+	 <!-- 특정한 게시글의 상세글보는 쿼리문 : 조건이 id && no -->
+	<select id="getOneBoard" resultMap="boardSelectMap">
+		select no,title,content,count,w_date,id,orgfilename,newfilename from springboard_upload where no=#{value}
+	</select>
+	
+	
+	<select id="selectByNoForDate" parameterType="int" resultType="string">
+		select w_date
+		From springboard_upload
+		where no=#{value}
+	</select>
+	
+	<!--file upload에서 아주 중요한 부분이기때문에 수정잘해본다.  -->
+	<update id="updateBoard" parameterType="boardVO">
+		update springboard_upload set title=#{title},content=#{content},orgfilename=#{orgfilename},newfilename=#{newfilename} where no=#{no}
+	</update>
+	
+	
+	<update id="updateCount" parameterType="int">
+		update springboard_upload set count = count+1 where no=#{no}
+	</update>
+	<!-- 특정글삭제 -->
+	<delete id="deleteBoard">
+		delete from springboard_upload where no=#{value}
+	</delete>
+	
+	<!--페이징처리해놓은?리스트 -->
+	 <select id="getBoardList" resultMap="boardSelectMap">
+		SELECT no, title, count, w_date,name FROM
+		(SELECT no, title, count, w_date, CEIL(rownum/5) as page, name FROM
+		(SELECT no,title, count, to_char(w_date, 'YYYY.MM.DD') w_date,name 
+		FROM springboard_upload s, member m
+		WHERE s.id=m.id ORDER BY no DESC)) WHERE page=#{value}
+	</select>
+	
+	<!-- 페이징 처리시 전체 게시물의 목록수를 리턴하는 쿼리문이 추가되어져야 한다.-->
+	
+	<select id="totalCount" resultType="int">
+		select Count(-1) from springboard_upload
+	
+	</select>
+	
+	
+</mapper>
+
+
+

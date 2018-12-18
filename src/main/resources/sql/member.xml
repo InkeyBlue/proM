@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="memberMapper">
+	<resultMap type="memberVO" id="memberselectMap">
+		<result property="id" column="id"/>
+		<result property="password" column="password"/>
+		<result property="name" column="name"/>
+		<result property="age" column="age"/>
+		<result property="email" column="email"/>
+		<result property="phoneNumber" column="phone_number"/>
+		<result property="address" column="address"/>
+		<result property="auth" column="auth"/>
+		<result property="company" column="company"/>
+		<result property="dept" column="dept"/>
+		<result property="rank" column="rank"/>
+		<result property="content" column="content"/>
+		<result property="profilePic" column="profile_pic"/>
+	</resultMap>
+
+
+	<select id="login" parameterType="memberVO" resultMap="memberselectMap">
+		select 
+		id, password, name , age , profile_pic
+		from members
+		where id=#{id} and password=#{password}
+	</select>
+	
+	
+	
+	<insert id="signup">
+	insert into members(id,password,name,age,email,phone_number,address,auth,company,dept,rank,content,profile_pic)
+	values(#{id},#{password},#{name},#{age},#{email},#{phoneNumber},#{address},#{auth},#{company},#{dept},#{rank},#{content},#{profilePic})
+	</insert>
+	
+	<update id="uploadImg" parameterType="map">
+	update members set profile_pic = #{param1} where id = #{param2}
+	</update>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
